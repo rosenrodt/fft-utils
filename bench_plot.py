@@ -108,7 +108,7 @@ def runBench(clientdirs, dryrun, numtrials):
             f.write(cmd.replace('__placeholder__', str(numtrials)))
         os.chmod(script, 0x755)
 
-        if not dryrun:
+        if not dryrun[i]:
             subprocess.run(script, cwd=clientdir, check=True)
 
         data = pd.read_csv(os.path.join(clientdir, 'run.log.filtered'), sep=' ', header=None)
@@ -177,11 +177,12 @@ def plot(tables):
 
 # %%
 if __name__ == "__main__":
-    import argparse, sys
+    import argparse, sys, os
     parser = argparse.ArgumentParser()
     parser.add_argument("dir", help="rocFFT path")
     parser.add_argument("--ref", help="the other rocFFT path when you also want to benchmark original rocFFT", default=None)
-    parser.add_argument("--dry", help="dry run benchmarks", action="store_true")
+    parser.add_argument("--dry0", help="dry run benchmark 0", action="store_true")
+    parser.add_argument("--dry1", help="dry run benchmark 1", action="store_true")
     parser.add_argument("-n", help="number of trials to run", default=3)
 
     args = parser.parse_args(sys.argv[1:])
@@ -189,9 +190,10 @@ if __name__ == "__main__":
 
     devpath = os.path.join(args.dir, relpath)
     refpath = os.path.join(args.ref, relpath) if args.ref is not None else None
-    dryrun = args.dry
+    dryrun0 = args.dry0
+    dryrun1 = args.dry1
     numtrials = args.n
 
-    tables = runBench([devpath, refpath], dryrun, numtrials)
+    tables = runBench([devpath, refpath], [dryrun0, dryrun1], numtrials)
     if refpath is not None:
         plot(tables)
