@@ -21,14 +21,14 @@ def runBench(clientdirs, dryrun, numtrials):
 
     tables = [None] * len(clientdirs)
     for i, clientdir in enumerate(clientdirs):
-        runcmd = pd.read_csv(os.path.join(clientdir, 'run.sh'), header=None)
-        runcmd = runcmd[runcmd.iloc[:,0].str.contains('rocfft')].reset_index(drop=True)
-        runcmd.set_axis(['cmd'], axis='columns', inplace=True)
-
         runfile = os.path.join(clientdir, 'run.sh')
         with open(runfile, 'w') as f:
             f.write(run)
         os.chmod(runfile, 0x755)
+        runcmd = pd.read_csv(runfile, header=None)
+        runcmd = runcmd[runcmd.iloc[:,0].str.contains('rocfft')].reset_index(drop=True)
+        runcmd.set_axis(['cmd'], axis='columns', inplace=True)
+
         script = os.path.join(clientdir, '_tmp_run.sh')
         with open(script, 'w') as f:
             f.write(cmd.replace('__placeholder__', str(numtrials)))
