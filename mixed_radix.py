@@ -56,7 +56,7 @@ def toy_fft_mixed_3_7_2(x):
     k = kkk.transpose().flatten() # explicit bit-reversal step
     return k
 
-def toy_fft_mixed_3_7_2_alt(x):
+def toy_fft_mixed_3_7_2_stockham(x):
     xxx = x.reshape(2,21)        # z-yx
 
     print("shape=", xxx.shape)   # shape= (2, 21)
@@ -75,10 +75,48 @@ def toy_fft_mixed_3_7_2_alt(x):
     k = kkk.flatten()
     return k
 
+def toy_fft_mixed_2_2_2_stockham(x):
+    xxx = x.reshape(2,4)        # z-yx
+
+    kxx = fft(xxx, axis=0)       # operate on z-axis
+    tw_mul(kxx, [0,1])
+    kxx_t = kxx.reshape(2,2,2).transpose(1,2,0) # y-x-z
+
+    kkx = fft(kxx_t, axis=0)     # operate on y-axis
+    tw_mul(kkx, [0,1])
+    kkx_t = kkx.transpose(1,0,2) # x-y-z
+
+    kkk = fft(kkx_t, axis=0)     # operate on x-axis
+
+    k = kkk.flatten()
+    return k
+
+def toy_fft_mixed_2_2_2_2_stockham(x):
+    x0 = x.reshape(2,8)
+
+    x1 = fft(x0, axis=0)
+    tw_mul(x1, [0,1])
+    x1t = x1.reshape(2,2,4).transpose(1,2,0)
+
+    x2 = fft(x1t, axis=0)
+    tw_mul(x2, [0,1])
+    x2t = x2.reshape(2,2,2,2).transpose(1,2,0,3)
+
+    x3 = fft(x2t, axis=0)
+    tw_mul(x3, [0,1])
+    x3t = x3.transpose(1,0,2,3)
+
+    x4 = fft(x3t, axis=0)
+
+    k = x4.flatten()
+    return k
+
 @pytest.mark.parametrize("N,func",[(21, toy_fft_mixed_3_7),
                                    (21, toy_fft_mixed_7_3),
                                    (42, toy_fft_mixed_3_7_2),
-                                   (42, toy_fft_mixed_3_7_2_alt)
+                                   (42, toy_fft_mixed_3_7_2_stockham),
+                                   ( 8, toy_fft_mixed_2_2_2_stockham),
+                                   (16, toy_fft_mixed_2_2_2_2_stockham)
                                    ])
 def test(N, func):
     x = np.arange(N)
@@ -92,4 +130,5 @@ def test(N, func):
     assert(err < 1e-10)
 
 # test(21, toy_fft_mixed_3_7)
-test(42, toy_fft_mixed_3_7_2_alt)
+# test(42, toy_fft_mixed_3_7_2_stockham)
+# test(16, toy_fft_mixed_2_2_2_2_stockham)
