@@ -4,13 +4,18 @@ import pytest
 
 # python3 -m pytest -v [-k keyword] mixed_radix.py
 
-def tw_mul(xx, dims=[0,1]):
+gDebug=True
+
+def tw_mul(xx, dims=[0,1], debug=gDebug):
+    if debug: print("===twiddle table===")
     shape = [xx.shape[dim] for dim in dims]
     assert len(shape) == 2
     with np.nditer(xx, op_flags=["readwrite"], flags=["multi_index"]) as it:
         for i in it:
             y, x = (it.multi_index[dim] for dim in dims)
-            i[...] = i * np.exp(-1j * 2 * np.pi * y*x / (shape[0]*shape[1]))
+            twiddle = i * np.exp(-1j * 2 * np.pi * y*x / (shape[0]*shape[1]))
+            i[...] = twiddle
+            if debug: print("(x, y)=({}, {}), tw={}".format(x,y,twiddle))
 
 def fft_mixed2_impl(xx):
     kx = fft(xx, axis=0) # axis same as dim: from highest to lowest
@@ -91,7 +96,10 @@ def toy_fft_mixed_2_2_2_stockham(x):
     k = kkk.flatten()
     return k
 
-def toy_fft_mixed_2_2_2_2_stockham(x):
+# DIF/DIT differs in twiddle factor generation
+# DIF: Starts from time domain a more granular twiddle, to freq domain a coarser twiddle
+# DIT: Starts from time domain a coarser twiddle, to freq domain a more granular tiwddle
+def toy_fft_mixed_2_2_2_2_stockham_dif(x):
     x0 = x.reshape(2,8)
 
     x1 = fft(x0, axis=0)
@@ -111,12 +119,33 @@ def toy_fft_mixed_2_2_2_2_stockham(x):
     k = x4.flatten()
     return k
 
+def toy_fft_mixed_2_2_2_2_stockham_dit(x):
+    x0 = x.reshape(2,2,2,2)
+
+    x1 = fft(x0, axis=0)
+    x1t = x1.reshape(2,2,2,2).transpose(1,2,3,0).reshape(2,4,2)
+    tw_mul(x1t, [0,2])
+
+    x2 = fft(x1t, axis=0)
+    x2t = x2.reshape(2,2,2,2).transpose(1,2,0,3).reshape(2,2,4)
+    tw_mul(x2t, [0,2])
+
+    x3 = fft(x2t, axis=0)
+    x3t = x3.reshape(2,2,2,2).transpose(1,0,2,3).reshape(2,8)
+    tw_mul(x3t, [0,1])
+
+    x4 = fft(x3t, axis=0)
+
+    k = x4.flatten()
+    return k
+
 @pytest.mark.parametrize("N,func",[(21, toy_fft_mixed_3_7),
                                    (21, toy_fft_mixed_7_3),
                                    (42, toy_fft_mixed_3_7_2),
                                    (42, toy_fft_mixed_3_7_2_stockham),
                                    ( 8, toy_fft_mixed_2_2_2_stockham),
-                                   (16, toy_fft_mixed_2_2_2_2_stockham)
+                                   (16, toy_fft_mixed_2_2_2_2_stockham_dit),
+                                   (16, toy_fft_mixed_2_2_2_2_stockham_dif)
                                    ])
 def test(N, func):
     x = np.arange(N)
@@ -131,4 +160,4 @@ def test(N, func):
 
 # test(21, toy_fft_mixed_3_7)
 # test(42, toy_fft_mixed_3_7_2_stockham)
-# test(16, toy_fft_mixed_2_2_2_2_stockham)
+test(16, toy_fft_mixed_2_2_2_2_stockham_dit)
