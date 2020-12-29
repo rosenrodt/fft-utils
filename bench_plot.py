@@ -1,8 +1,8 @@
 # %%
 from fftsizes import runs
 
-# run = runs["std-large"]
-run = runs["gromacs"]
+run = runs["std-large"]
+# run = runs["gromacs"]
 
 cmd ="""#!/bin/bash
 set -x
@@ -95,7 +95,7 @@ def plot(tables):
     plt.title("FFT end-to-end run time")
 
     plt.yticks(range(0, len(labels)*2, 2), labels)
-    plt.xticks(np.arange(0, 5, 0.5))
+    # plt.xticks(np.arange(0, 5, 0.5))
     plt.xlim(left=0)
     plt.tight_layout()
 

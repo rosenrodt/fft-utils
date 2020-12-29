@@ -90,13 +90,21 @@ else
 echo "set N to default=30"
 N=30
 fi
-./rocfft-rider --length 256 256 256 -t 2 -N $N
+./rocfft-rider --length 256 256 256 -t 0 -N $N
+./rocfft-rider --length 512 512 512 -t 0 -N $N
+./rocfft-rider --length 768 768 768 -t 0 -N $N
+./rocfft-rider --length 1024 1024 1024 -t 0 -N $N
 ./rocfft-rider --length 256 256 256 -t 1 -N $N
-./rocfft-rider --length 512 512 512 -t 2 -N $N
 ./rocfft-rider --length 512 512 512 -t 1 -N $N
-./rocfft-rider --length 768 768 768 -t 2 -N $N
 ./rocfft-rider --length 768 768 768 -t 1 -N $N
-./rocfft-rider --length 1024 1024 1024 -t 2 -N $N
 ./rocfft-rider --length 1024 1024 1024 -t 1 -N $N
+./rocfft-rider --length 256 256 256 -t 2 -N $N
+./rocfft-rider --length 512 512 512 -t 2 -N $N
+./rocfft-rider --length 768 768 768 -t 2 -N $N
+./rocfft-rider --length 1024 1024 1024 -t 2 -N $N
+./rocfft-rider --length 256 256 256 -t 3 -N $N
+./rocfft-rider --length 512 512 512 -t 3 -N $N
+./rocfft-rider --length 768 768 768 -t 3 -N $N
+./rocfft-rider --length 1024 1024 1024 -t 3 -N $N
 """
 runs["std-large"] = run

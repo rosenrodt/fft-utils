@@ -148,7 +148,8 @@ def toy_fft_mixed_2_2_2_2_stockham_dit(x):
                                    (16, toy_fft_mixed_2_2_2_2_stockham_dif)
                                    ])
 def test(N, func):
-    x = np.arange(N)
+    # x = np.arange(N) # real ascending value
+    x = np.random.random(N) + 1j*np.random.random(N) # complex random value
     kref = fft(x)
     print("x=\n", x)
     print("kref=\n", kref)

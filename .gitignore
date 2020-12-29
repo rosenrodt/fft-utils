@@ -1,0 +1,12 @@
+*.bc
+*.cui
+*.o
+*.out
+*.s
+*.txt
+*.tgz
+*.csv
+*.pyc
+*.hipfb
+*.jpg
+.vscode/**
