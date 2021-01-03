@@ -7,60 +7,68 @@ $$
 
 ***
 
-### 2-pass decomposition
+## 2-pass mixed-radix decomposition
 
-- With radices $N_x, N_y$ where $N=N_xN_y$
-  - Fold 1D index $n$ into 2D index $n_x,n_y$ as $N_x$-by-$N_y$ rectangle
-  $\Rightarrow$ $n=n_x+N_xn_y$
-  - Fold 1D index $k$ into 2D index $k_y,k_x$ as $N_y$-by-$N_x$ rectangle (dimension reversed/transposed) $\Rightarrow$ $k=k_y+N_y k_x$
+- With $N=N_1N_2$
+  - Fold $n$ into $(n_1,n_2)$ where $n=n_1+N_1n_2$
+  - Fold $k$ into $(k_2,k_1)$ where $k=k_2+N_2 k_1$ (dimension reversed/transposed)
 - Fourier transform $X(k)=\Sigma_{n=0}^{N-1}x(n)W^{nk}_N$ becomes
 
 $$
 \begin{aligned}
-X(k_y+N_y k_x) &= \sum_{n_x}\sum_{n_y}x(n_x + N_x n_y)W_{N_x N_y}^{(n_x+N_xn_y)(k_y+N_yk_x)} \\
-&= \sum_{n_x}\sum_{n_y}x(\dotsb)W^{n_x k_x}_{N_x} W^{n_y k_y}_{N_y} W^{n_x k_y}_{N_x N_y} \underbrace{W^{n_y k_x}_{1}}_{e^{j 2 \pi N}=1} \\
-&= \underbrace{\sum_{n_x} \underbrace{W^{n_x k_y}_{N_x N_y}}_{\text{Twiddle}}
-   \underbrace{
-     \left(
-       \sum_{n_y}x(\dotsb)W^{n_y k_y}_{N_y}
-     \right)
-   }_{\text{FFT along Y-dim}}
-   W^{n_x k_x}_{N_x}}_{\text{FFT along X-dim}}
+X(k_2+N_2 k_1) &= \sum_{n_1}\sum_{n_2}x(n_1 + N_1 n_2)W_{N_1 N_2}^{(n_1+N_1n_2)(k_2+N_2k_1)} \\
+&= \sum_{n_1}\sum_{n_2}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_1 k_2}_{N_1 N_2} \bcancel{W^{n_2 k_1}_{1}}\underset{\mathrlap{e^{j 2 \pi N}=1}}{} \\
+&= \underbrace{\sum_{n_1} \underbrace{\vphantom{\sum_{n_2}}W^{n_1 k_2}_{N_1 N_2}}_{\text{Twiddle}}
+  \biggl(
+    \underbrace{
+      \sum_{n_2}x(\dotsb)W^{n_2 k_2
+    }_{N_2}}_{\text{FFT along } \bold{D_2}}
+  \biggr)
+W^{n_1 k_1}_{N_1}}_{\text{FFT along } \bold{D_1}}
 \end{aligned}
 $$
 
 - Algorithm
-  1. Perform $N_x$ radix-$N_y$ FFTs along the high dimension $N_y$
-  2. Multiply by twiddle factor $W^{n_x k_y}_{N_x N_y}$
-  3. Perform $N_y$ radix-$N_x$ FFTs along the low dimension $N_x$
+  1. Perform FFTs along the high dimension $\bold{D_2}$
+  2. Pointwise multiply by twiddle factor $W^{n_1 k_2}_{N_1 N_2}$
+  3. Perform FFTs along the low dimension $\bold{D_1}$
   4. Read the resulting data transposed
 
 ***
 
-### 3-pass decomposition
+## 3-pass mixed-radix decomposition
 
-- With radices $N_x, N_y, N_z$ where $N=N_xN_yN_z$
-  - Fold 1D index $n$ into 3D index $n_x,n_y,n_z$ as $N_x N_y N_z$ volume
-  $\Rightarrow$ $n=n_x+N_xn_y+N_xN_yn_z$
-  - Fold 1D index $k$ into 3D index $k_z,k_y,k_x$ as $N_z N_y N_x$ volume (dimension reversed/transposed) $\Rightarrow$ $k=k_z+N_zk_y+N_y N_zk_x$
+- With $N=N_1N_2N_3$
+  - Fold $n$ into $(n_1,n_2,n_3)$ where $n=n_1+N_1n_2+N_1N_2n_3$
+  - Fold $k$ into $(k_3,k_2,k_1)$ where $k=k_3+N_3k_2+N_2 N_3k_1$ (dimension reversed/transposed)
 - Fourier transform becomes
 
 $$
 \begin{aligned}
-X(k_z+N_zk_y+N_y N_zk_x) &= \sum_{n_x}\sum_{n_y}\sum_{n_z}x(n_x+N_xn_y+N_xN_yn_z)W_{N_xN_yN_z}^{(n_x+N_xn_y+N_xN_yn_z)(k_z+N_zk_y+N_y N_zk_x)} \\
-&= \sum_{n_x}\sum_{n_y}\sum_{n_z}x(\dotsb)W^{n_x k_x}_{N_x} W^{n_y k_y}_{N_y} W^{n_z k_z}_{N_z} W^{n_x k_y}_{N_x N_y} W^{n_y k_z}_{N_y N_z} W^{n_x k_z}_{N_x N_y N_z} \\
-&= \sum_{n_x} W^{n_x(N_z k_y + k_z)}_{N_x (N_y N_z)} \left[ \sum_{n_y} W^{n_y k_z}_{N_y N_z} \left( \sum_{n_z}x(\dotsb)W^{n_z k_z}_{N_z} \right) W^{n_y k_y}_{N_y} \right] W^{n_x k_x}_{N_x} \\
-&= \text{FFT}_x\left\{
-  W^{n_x(N_z k_y + k_z)}_{N_x (N_y N_z)} \text{FFT}_y \left[
-    W^{n_y k_z}_{N_y N_z} \text{FFT}_z \left(
-      x\tiny(\dotsb)
-    \right)\right]\right\}
+X(k_3+N_3k_2+N_2 N_3k_1) &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(n_1+N_1n_2+N_1N_2n_3)W_{N_1N_2N_3}^{(n_1+N_1n_2+N_1N_2n_3)(k_3+N_3k_2+N_2 N_3k_1)} \\
+&= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_1 k_2}_{N_1 N_2} W^{n_2 k_3}_{N_2 N_3} W^{n_1 k_3}_{N_1 N_2 N_3} \\
+%% &= \sum_{n_1} W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3} \biggl[ \sum_{n_2} W^{n_2 k_3}_{N_2 N_3} \biggl( \sum_{n_3}x(\dotsb)W^{n_3 k_3}_{N_3} \biggr) W^{n_2 k_2}_{N_2} \biggr] W^{n_1 k_1}_{N_1} \\
+&= \underbrace{
+\sum_{n_1} \underbrace{ \vphantom{\sum_{n_1}} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)} }_{\text{Twiddle}}
+\biggl[
+\underbrace{
+  \sum_{n_2} \underbrace{
+    \vphantom{\sum_{n_1}} W^{n_2 k_3}_{N_2 N_3} }_{\text{Twiddle}}
+  \biggl(
+  \underbrace{
+    \sum_{n_3} x(\dotsb)W^{n_3 k_3}_{N_3} }_{\text{FFT along } \bold{D_3}}
+  \biggr)
+W^{n_2 k_2}_{N_2} }_{\text{FFT along } \bold{D_2}}
+\biggr]
+W^{n_1 k_1}_{N_1}
+}_{\text{FFT along } \bold{D_1}}
 \end{aligned}
 $$
 
-
-
-- Recursive tree structure revealed: computing FFT for $N_x$-by-$N_y N_z$ array *in turn requires computing FFT for $N_y$-by-$N_z$ array $\forall n_x \in \{0, 1, \dotsb, N_x-1\}$*
+- Recursive tree structure revealed:
+  - FFT for $N_1 N_2 N_3$ array requires 2-pass FFT for $N_1$-by-$N_2 N_3$ pseudo matrix
+  - Which in turn requires *another 2-pass FFT* for $N_2$-by-$N_3$ pseudo matrix
+  - 3 leaf nodes corresponding to FFTs of 3 different radices, 2 parent nodes corresponding to 2 twiddle multiplication
 
 ```txt
   N1xN2xN3 .______ N1
@@ -72,14 +80,20 @@ $$
 
 ***
 
-### Tree decomposition
+## Tree decomposition
 
 ```txt
-  256 (N1xN2xN3xN4) .______ 16 (N1xN2) .___ 4 (N1)
-                    |                   \__ 4 (N2)
+  256 (N1xN2xN3xN4) .____ 16 (N1xN2) .____ 4 (N1)
+                    |                 \___ 4 (N2)
                     |
-                     \_____ 16 (N3xN4) .___ 4 (N3)
-                                        \__ 4 (N4)
+                     \___ 16 (N3xN4) .____ 4 (N3)
+                                      \___ 4 (N4)
+  or
+
+  256 (N1xN2xN3xN4) .____ 4  (N1)
+                     \___ 64 (N2xN3xN4) .____ 4  (N2)
+                                         \___ 16 (N3xN4) .____ 4 (N3)
+                                                          \___ 4 (N4)
 ```
 
 TODO:
@@ -87,12 +101,11 @@ TODO:
 - Perform 16 Stockham FFTs in first dimension
   - 4-FFT in
 - Multiply by twiddle factor
-- Perform 16 Stockham FFTs in second dimension
-- Read the data transposed
+- Perform 16 Stockham FFTs in second dimension- Read the data transposed
 
 ***
 
-### Decomposition with gradual transposition
+## Decomposition with gradual transposition
 
 - Instead of transposing all dimensions at once, can transpose one at a time
 - TODO: Example
@@ -108,13 +121,3 @@ TODO:
   4 (N3) __/
 ```
 
-
-***
-
-Archived
-
-$= \sum_{n_x} W^{n_x k_y}_{N_x N_y} W^{n_x k_z}_{N_x N_y N_z} \left[ \sum_{n_y} W^{n_y k_z}_{N_y N_z} \left( \sum_{n_z}x(\dotsb)W^{n_z k_z}_{N_z} \right) W^{n_y k_y}_{N_y} \right] W^{n_x k_x}_{N_x}$
-
-$$
-\underbrace{123}
-$$
