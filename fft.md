@@ -18,8 +18,14 @@ $$
 $$
 \begin{aligned}
 X(k_y+N_y k_x) &= \sum_{n_x}\sum_{n_y}x(n_x + N_x n_y)W_{N_x N_y}^{(n_x+N_xn_y)(k_y+N_yk_x)} \\
-&= \sum_{n_x}\sum_{n_y}x(\dotsb)W^{n_x k_x}_{N_x} W^{n_y k_y}_{N_y} W^{n_x k_y}_{N_x N_y} W^{n_y k_x}_{1} \\
-&= \sum_{n_x} W^{n_x k_y}_{N_x N_y}\left(\sum_{n_y}x(\dotsb)W^{n_y k_y}_{N_y}\right)W^{n_x k_x}_{N_x}
+&= \sum_{n_x}\sum_{n_y}x(\dotsb)W^{n_x k_x}_{N_x} W^{n_y k_y}_{N_y} W^{n_x k_y}_{N_x N_y} \underbrace{W^{n_y k_x}_{1}}_{e^{j 2 \pi N}=1} \\
+&= \underbrace{\sum_{n_x} \underbrace{W^{n_x k_y}_{N_x N_y}}_{\text{Twiddle}}
+   \underbrace{
+     \left(
+       \sum_{n_y}x(\dotsb)W^{n_y k_y}_{N_y}
+     \right)
+   }_{\text{FFT along Y-dim}}
+   W^{n_x k_x}_{N_x}}_{\text{FFT along X-dim}}
 \end{aligned}
 $$
 
@@ -44,7 +50,11 @@ $$
 X(k_z+N_zk_y+N_y N_zk_x) &= \sum_{n_x}\sum_{n_y}\sum_{n_z}x(n_x+N_xn_y+N_xN_yn_z)W_{N_xN_yN_z}^{(n_x+N_xn_y+N_xN_yn_z)(k_z+N_zk_y+N_y N_zk_x)} \\
 &= \sum_{n_x}\sum_{n_y}\sum_{n_z}x(\dotsb)W^{n_x k_x}_{N_x} W^{n_y k_y}_{N_y} W^{n_z k_z}_{N_z} W^{n_x k_y}_{N_x N_y} W^{n_y k_z}_{N_y N_z} W^{n_x k_z}_{N_x N_y N_z} \\
 &= \sum_{n_x} W^{n_x(N_z k_y + k_z)}_{N_x (N_y N_z)} \left[ \sum_{n_y} W^{n_y k_z}_{N_y N_z} \left( \sum_{n_z}x(\dotsb)W^{n_z k_z}_{N_z} \right) W^{n_y k_y}_{N_y} \right] W^{n_x k_x}_{N_x} \\
-&= \text{FFT}_x\left\{W^{n_x(N_z k_y + k_z)}_{N_x (N_y N_z)} \text{FFT}_y\left[ W^{n_y k_z}_{N_y N_z} \text{FFT}_z \left( x\tiny(\dotsb) \right)\right]\right\}
+&= \text{FFT}_x\left\{
+  W^{n_x(N_z k_y + k_z)}_{N_x (N_y N_z)} \text{FFT}_y \left[
+    W^{n_y k_z}_{N_y N_z} \text{FFT}_z \left(
+      x\tiny(\dotsb)
+    \right)\right]\right\}
 \end{aligned}
 $$
 
@@ -104,3 +114,7 @@ TODO:
 Archived
 
 $= \sum_{n_x} W^{n_x k_y}_{N_x N_y} W^{n_x k_z}_{N_x N_y N_z} \left[ \sum_{n_y} W^{n_y k_z}_{N_y N_z} \left( \sum_{n_z}x(\dotsb)W^{n_z k_z}_{N_z} \right) W^{n_y k_y}_{N_y} \right] W^{n_x k_x}_{N_x}$
+
+$$
+\underbrace{123}
+$$
