@@ -4,7 +4,7 @@ import pytest
 
 # python3 -m pytest -v [-k keyword] mixed_radix.py
 
-gDebug=True
+gDebug=False
 
 def tw_mul(xx, dims=[0,1], debug=gDebug):
     if debug: print("===twiddle table===")
@@ -19,13 +19,13 @@ def tw_mul(xx, dims=[0,1], debug=gDebug):
 
 def fft_mixed2_impl(xx):
     kx = fft(xx, axis=0) # axis same as dim: from highest to lowest
-    print("after fft columns"); print(kx)
+    # print("after fft columns"); print(kx)
 
     tw_mul(kx)
-    print("after twiddle");print(kx)
+    # print("after twiddle");print(kx)
 
     kk = fft(kx, axis=1)
-    print("after fft row");print(kk)
+    # print("after fft row");print(kk)
 
     k = kk.transpose().flatten() # explicit bit-reversal step
     return k
@@ -157,7 +157,8 @@ def test(N, func):
     print("answer="); print(k1)
     err = np.linalg.norm(k1 - kref)
     print("l2-error=", err)
-    assert(err < 1e-10)
+    assert(err/N < 1e-10)
+
 
 # test(21, toy_fft_mixed_3_7)
 # test(42, toy_fft_mixed_3_7_2_stockham)
