@@ -13,8 +13,8 @@ def tw_mul(xx, dims=[0,1], debug=gDebug):
     with np.nditer(xx, op_flags=["readwrite"], flags=["multi_index"]) as it:
         for i in it:
             y, x = (it.multi_index[dim] for dim in dims)
-            twiddle = i * np.exp(-1j * 2 * np.pi * y*x / (shape[0]*shape[1]))
-            i[...] = twiddle
+            twiddle = np.exp(-1j * 2 * np.pi * y*x / (shape[0]*shape[1]))
+            i[...] = i * twiddle
             if debug: print("(x, y)=({}, {}), tw={}".format(x,y,twiddle))
 
 def fft_mixed2_impl(xx):
@@ -139,16 +139,38 @@ def toy_fft_mixed_2_2_2_2_stockham_dit(x):
     k = x4.flatten()
     return k
 
+# first 2 dims are shape, third dim is batch count
+def stockham_recursive_impl(x):
+    batch = x.shape[2]
+    for xx in [x[:,:,i] for i in range(0,batch)]:
+        kx = fft(xx, axis=0)
+        tw_mul(kx)
+        xx[...] = fft(kx, axis=1)
+    return x.transpose(1,0,2)
+
+def stockham_recursive_4_4_4_4(x):
+    x = x.reshape(4,4,-1) # highest 2 dim
+    x = stockham_recursive_impl(x)
+
+    x = x.reshape(16,16)
+    tw_mul(x, [0, 1]) # transpose before multiplying
+
+    xt = x.transpose(1,0).reshape(4,4,-1)
+    xt = stockham_recursive_impl(xt)
+
+    return xt.flatten()
+
 @pytest.mark.parametrize("N,func",[(21, toy_fft_mixed_3_7),
                                    (21, toy_fft_mixed_7_3),
                                    (42, toy_fft_mixed_3_7_2),
                                    (42, toy_fft_mixed_3_7_2_stockham),
                                    ( 8, toy_fft_mixed_2_2_2_stockham),
                                    (16, toy_fft_mixed_2_2_2_2_stockham_dit),
-                                   (16, toy_fft_mixed_2_2_2_2_stockham_dif)
+                                   (16, toy_fft_mixed_2_2_2_2_stockham_dif),
+                                   (256, stockham_recursive_4_4_4_4)
                                    ])
 def test(N, func):
-    # x = np.arange(N) # real ascending value
+    # x = np.arange(N, dtype=np.complex) # real ascending value
     x = np.random.random(N) + 1j*np.random.random(N) # complex random value
     kref = fft(x)
     print("x=\n", x)
@@ -157,9 +179,13 @@ def test(N, func):
     print("answer="); print(k1)
     err = np.linalg.norm(k1 - kref)
     print("l2-error=", err)
-    assert(err/N < 1e-10)
+    assert err/N < 1e-10
 
+# def test2D(M, N, func):
+#     x = np.arange(M*N).reshape(M,N)
+#     pass
 
 # test(21, toy_fft_mixed_3_7)
 # test(42, toy_fft_mixed_3_7_2_stockham)
-test(16, toy_fft_mixed_2_2_2_2_stockham_dit)
+# test(16, toy_fft_mixed_2_2_2_2_stockham_dit)
+test(256, stockham_recursive_4_4_4_4)
