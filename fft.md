@@ -1,3 +1,5 @@
+\* Note: To render LaTeX math equations, view the doc in [VSCode](https://code.visualstudio.com/) + [Markdown All in One](https://github.com/yzhang-gh/vscode-markdown) plugin
+
 # Fourier transform
 
 Discrete Fourier transform:
