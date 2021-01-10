@@ -98,7 +98,7 @@ def toy_fft_mixed_2_2_2_stockham(x):
 
 # DIF/DIT differs in twiddle factor generation
 # DIF: Starts from time domain a more granular twiddle, to freq domain a coarser twiddle
-# DIT: Starts from time domain a coarser twiddle, to freq domain a more granular tiwddle
+# DIT: Starts from time domain a coarser twiddle, to freq domain a more granular twiddle
 def toy_fft_mixed_2_2_2_2_stockham_dif(x):
     x0 = x.reshape(2,8)
 
