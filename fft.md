@@ -130,3 +130,41 @@ $$
                                       \___ 4 (N4) ___/
 ```
 
+***
+
+
+## Decimation-in-freqeuncy (DIF) form:
+- DIF form is derived by factoring twiddle factor the different way:
+
+$$
+\begin{aligned}
+X(\dotsb) &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_2 k_3}_{N_2 N_3} \bcancel{W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3}} \underset{\mathrlap{\hphantom{...} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)}}}{} \\
+&= \sum_{n_1} \underbrace{ \vphantom{\sum_{n_1}} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_3 N_2)} }_{\text{Twiddle}}
+\biggl[
+  \sum_{n_2} \underbrace{
+    \vphantom{\sum_{n_1}} W^{n_2 k_3}_{N_2 N_3} }_{\text{Twiddle} \vphantom{\Text{()}}}
+  \biggl(
+    \sum_{n_3} x(\dotsb)W^{n_3 k_3}_{N_3}
+  \biggr)
+W^{n_2 k_2}_{N_2}
+\biggr]
+W^{n_1 k_1}_{N_1}
+\hphantom{.....}\text{(decimation in time)}\\
+or & \\
+& = \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} \bcancel{W^{n_2 k_3}_{N_2 N_3}} W^{n_1 k_2}_{N_1 N_2} \bcancel{W^{n_1 k_3}_{N_1 N_2 N_3}} \underset{\mathrlap{\hphantom{...} W^{(n_1+N_1 n_2)k_3}_{(N_1 N_2) N_3}}}{} \\
+&=
+\sum_{n_1} \underbrace{ \vphantom{\sum_{n_1}} W^{n_1 k_2}_{N_1 N_2} }_{\text{Twiddle}}
+\biggl[
+  \sum_{n_2} \underbrace{
+    \vphantom{\sum_{n_1}} W^{(n_1+N_1 n_2)k_3}_{(N_1 N_2) N_3} }_{\text{Twiddle} \vphantom{\Text{()}}}
+  \biggl(
+    \sum_{n_3} x(\dotsb)W^{n_3 k_3}_{N_3}
+  \biggr)
+W^{n_2 k_2}_{N_2}
+\biggr]
+W^{n_1 k_1}_{N_1} \hphantom{.....}\text{(decimation in frequency)}\\
+\end{aligned}
+$$
+- Comparing the equations: all except twiddle factors stay the same
+  - DIT: coarser twiddle $W_{N_2 N_3}$ $\rightarrow$ finer twiddle $W_{N_1(N_3 N_2)}$
+  - DIF: finer twiddle $W_{(N_1 N_2) N_3}$ $\rightarrow$ coarser twiddle $W_{N_1 N_2}$
