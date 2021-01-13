@@ -18,15 +18,15 @@ $$
 
 $$
 \begin{aligned}
-X(k_2+N_2 k_1) &= \sum_{n_1}\sum_{n_2}x(n_1 + N_1 n_2)W_{N_1 N_2}^{(n_1+N_1n_2)(k_2+N_2k_1)} \\
+\underbrace{X(k_2+N_2 k_1)}_{X(k_2, k_1)} &= \sum_{n_1}\sum_{n_2}x(n_1 + N_1 n_2)W_{N_1 N_2}^{(n_1+N_1n_2)(k_2+N_2k_1)} \\
 &= \sum_{n_1}\sum_{n_2}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_1 k_2}_{N_1 N_2} \bcancel{W^{n_2 k_1}_{1}}\underset{\mathrlap{\hphantom{..}e^{j 2 \pi N}=1}}{} \\
 &= \underbrace{\sum_{n_1} \underbrace{\vphantom{\sum_{n_2}}W^{n_1 k_2}_{N_1 N_2}}_{\text{Twiddle}}
   \biggl(
     \underbrace{
       \sum_{n_2}x(\dotsb)W^{n_2 k_2
-    }_{N_2}}_{\text{FFT along } \bold{D_2}}
+    }_{N_2}}_{x'(n_1,k_2)}
   \biggr)
-W^{n_1 k_1}_{N_1}}_{\text{FFT along } \bold{D_1}}
+W^{n_1 k_1}_{N_1}}_{x''(k_1,k_2)}
 \end{aligned}
 $$
 
@@ -47,7 +47,7 @@ $$
 
 $$
 \begin{aligned}
-X(k_3+N_3k_2+N_2 N_3k_1) &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(n_1+N_1n_2+N_1N_2n_3)W_{N_1N_2N_3}^{(n_1+N_1n_2+N_1N_2n_3)(k_3+N_3k_2+N_2 N_3k_1)} \\
+\underbrace{X(k_3+N_3k_2+N_2 N_3k_1)}_{X(k_3, k_2, k_1)} &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(n_1+N_1n_2+N_1N_2n_3)W_{N_1N_2N_3}^{(n_1+N_1n_2+N_1N_2n_3)(k_3+N_3k_2+N_2 N_3k_1)} \\
 &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_2 k_3}_{N_2 N_3} \bcancel{W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3}} \underset{\mathrlap{\hphantom{...} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)}}}{} \\
 %% &= \sum_{n_1} W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3} \biggl[ \sum_{n_2} W^{n_2 k_3}_{N_2 N_3} \biggl( \sum_{n_3}x(\dotsb)W^{n_3 k_3}_{N_3} \biggr) W^{n_2 k_2}_{N_2} \biggr] W^{n_1 k_1}_{N_1} \\
 &= \underbrace{
@@ -58,12 +58,12 @@ X(k_3+N_3k_2+N_2 N_3k_1) &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(n_1+N_1n_2+N_1N_2n_3
     \vphantom{\sum_{n_1}} W^{n_2 k_3}_{N_2 N_3} }_{\text{Twiddle} \vphantom{\Text{()}}}
   \biggl(
   \underbrace{
-    \sum_{n_3} x(\dotsb)W^{n_3 k_3}_{N_3} }_{\text{FFT along } \bold{D_3}} \vphantom{\Text{()}}
+    \sum_{n_3} x(\dotsb)W^{n_3 k_3}_{N_3} }_{x'(n_1, n_2, k_3)} \vphantom{\Text{()}}
   \biggr)
-W^{n_2 k_2}_{N_2} }_{\text{FFT along } \bold{D_2}}
+W^{n_2 k_2}_{N_2} }_{x''(n_1, k_2, k_3 )}
 \biggr]
 W^{n_1 k_1}_{N_1}
-}_{\text{FFT along } \bold{D_1}}\\
+}_{x'''(k_1, k_2, k_3)}\\
 \end{aligned}
 $$
 > (!) Note: outermost twiddle factor has it's index **transposed/bit-reversed**
