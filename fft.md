@@ -70,8 +70,9 @@ $$
 
 - Recursive tree structure revealed:
   - FFT for $N_1 N_2 N_3$ array requires 2-pass FFT for $N_1$-by-$N_3 N_2$ pseudo matrix
-  - FFT for $N_1$-batched $N_3 N_2$ array in turn requires *another 2-pass FFT* for $N_2$-by-$N_3$ pseudo matrix
+  - FFT for $N_3 N_2$ array requires *another 2-pass FFT* for $N_2$-by-$N_3$ pseudo matrix
   - 3 leaf nodes corresponding to FFTs of 3 different radices, 2 parent nodes corresponding to 2 twiddle multiplication
+  - Recursion also implies FFT begins with highest pseudo-dim. Never begins with lowest pseudo-dim.
 
 ```txt
   N1xN2xN3 .______ N1
