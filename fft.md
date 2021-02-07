@@ -171,3 +171,24 @@ $$
 - Comparing the equations: all except twiddle factors stay the same
   - DIT: coarser twiddle $W_{N_2 N_3}$ $\rightarrow$ finer twiddle $W_{N_1(N_3 N_2)}$
   - DIF: finer twiddle $W_{(N_1 N_2) N_3}$ $\rightarrow$ coarser twiddle $W_{N_1 N_2}$
+
+## Complex conjugation property
+- Complex conjugation property: $x^*(n)\xrightarrow{\text{DFT}_N}X^*(N-k)$. Proof:
+$$
+\begin{aligned}
+\text{DFT}_N\bigl\{x^*(n)\bigr\} & = \sum_{n}^{N}{x^*(n)W_{N}^{nk}} \\
+&= \biggl[\sum_{n}^{N}{x(n)W_{N}^{-nk}}\biggr]^* \\
+&= \biggl[\sum_{n}^{N}{
+  x(n)  W_{N}^{-nk}\bcancel{ W_N^{nN} }_{\vphantom{\bigl)}\hphantom{.}=1}
+  }\biggr]^* \\
+&= X^*(N-k)
+\end{aligned}
+$$
+- For real-valued time series: $X(k)=X^*(N-k)$. Proof: since $x^*(n)=x(n)$, then
+$$
+\begin{aligned}
+\text{FFT}\bigl\{x(n)\bigr\} &= \text{FFT}\bigl\{x^*(n)\bigr\} \\
+X(k) &= X^*(N-k)
+\end{aligned}
+$$
+
