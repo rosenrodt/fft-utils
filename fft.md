@@ -1,8 +1,13 @@
 \* Note: To render LaTeX math equations, view the doc in [VSCode](https://code.visualstudio.com/) + [Markdown All in One](https://github.com/yzhang-gh/vscode-markdown) plugin
 
+$$
+\global\def\cancelto#1#2{\bcancel{#2} \underset{\mathrlap{\hphantom{.} #1}}{}} %%\cancelto{null}{1}
+$$
+
 # Fourier transform
 
 Discrete Fourier transform:
+
 $$
 X(k)=\sum_{n=0}^{N-1}x(n)e^{{-j2 \pi nk}\over{N}} \xrightarrow{\tiny{exp(-j2\pi/N)=W_N}}\sum_{n=0}^{N-1}x(n)W^{nk}_N
 $$
@@ -19,7 +24,7 @@ $$
 $$
 \begin{aligned}
 \underbrace{X(k_2+N_2 k_1)}_{X(k_2, k_1)} &= \sum_{n_1}\sum_{n_2}x(n_1 + N_1 n_2)W_{N_1 N_2}^{(n_1+N_1n_2)(k_2+N_2k_1)} \\
-&= \sum_{n_1}\sum_{n_2}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_1 k_2}_{N_1 N_2} \bcancel{W^{n_2 k_1}_{1}}\underset{\mathrlap{\hphantom{..}e^{j 2 \pi N}=1}}{} \\
+&= \sum_{n_1}\sum_{n_2}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_1 k_2}_{N_1 N_2} \cancelto{e^{j 2 \pi N}=1}{W^{n_2 k_1}_{1}} \\
 &= \underbrace{\sum_{n_1} \underbrace{\vphantom{\sum_{n_2}}W^{n_1 k_2}_{N_1 N_2}}_{\text{Twiddle}}
   \biggl(
     \underbrace{
@@ -48,8 +53,8 @@ $$
 $$
 \begin{aligned}
 \underbrace{X(k_3+N_3k_2+N_2 N_3k_1)}_{X(k_3, k_2, k_1)} &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(n_1+N_1n_2+N_1N_2n_3)W_{N_1N_2N_3}^{(n_1+N_1n_2+N_1N_2n_3)(k_3+N_3k_2+N_2 N_3k_1)} \\
-&= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_2 k_3}_{N_2 N_3} \bcancel{W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3}} \underset{\mathrlap{\hphantom{...} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)}}}{} \\
-%% &= \sum_{n_1} W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3} \biggl[ \sum_{n_2} W^{n_2 k_3}_{N_2 N_3} \biggl( \sum_{n_3}x(\dotsb)W^{n_3 k_3}_{N_3} \biggr) W^{n_2 k_2}_{N_2} \biggr] W^{n_1 k_1}_{N_1} \\
+&= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_2 k_3}_{N_2 N_3} \cancelto{W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)}}{W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3}} \\
+%%&= \sum_{n_1} W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3} \biggl[ \sum_{n_2} W^{n_2 k_3}_{N_2 N_3} \biggl( \sum_{n_3}x(\dotsb)W^{n_3 k_3}_{N_3} \biggr) W^{n_2 k_2}_{N_2} \biggr] W^{n_1 k_1}_{N_1} \\
 &= \underbrace{
 \sum_{n_1} \underbrace{ \vphantom{\sum_{n_1}} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_3 N_2)} }_{\text{Twiddle(!)}}
 \biggl[
@@ -141,7 +146,7 @@ $$
 
 $$
 \begin{aligned}
-X(\dotsb) &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_2 k_3}_{N_2 N_3} \bcancel{W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3}} \underset{\mathrlap{\hphantom{...} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)}}}{} \\
+X(\dotsb) &= \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} W^{n_2 k_3}_{N_2 N_3} \cancelto{W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_2 N_3)}}{W^{n_1 k_2}_{N_1 N_2} W^{n_1 k_3}_{N_1 N_2 N_3}}  \\
 &= \sum_{n_1} \underbrace{ \vphantom{\sum_{n_1}} W^{n_1(N_3 k_2 + k_3)}_{N_1 (N_3 N_2)} }_{\text{Twiddle}}
 \biggl[
   \sum_{n_2} \underbrace{
@@ -154,7 +159,7 @@ W^{n_2 k_2}_{N_2}
 W^{n_1 k_1}_{N_1}
 \hphantom{.....}\text{(decimation in time)}\\
 or & \\
-& = \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} \bcancel{W^{n_2 k_3}_{N_2 N_3}} W^{n_1 k_2}_{N_1 N_2} \bcancel{W^{n_1 k_3}_{N_1 N_2 N_3}} \underset{\mathrlap{\hphantom{...} W^{(n_1+N_1 n_2)k_3}_{(N_1 N_2) N_3}}}{} \\
+& = \sum_{n_1}\sum_{n_2}\sum_{n_3}x(\dotsb)W^{n_1 k_1}_{N_1} W^{n_2 k_2}_{N_2} W^{n_3 k_3}_{N_3} \bcancel{W^{n_2 k_3}_{N_2 N_3}} W^{n_1 k_2}_{N_1 N_2} \cancelto{W^{(n_1+N_1 n_2)k_3}_{(N_1 N_2) N_3}}{W^{n_1 k_3}_{N_1 N_2 N_3}} \\
 &=
 \sum_{n_1} \underbrace{ \vphantom{\sum_{n_1}} W^{n_1 k_2}_{N_1 N_2} }_{\text{Twiddle}}
 \biggl[
@@ -174,17 +179,20 @@ $$
 
 ## Complex conjugation property
 - Complex conjugation property: $x^*(n)\xrightarrow{\text{DFT}_N}X^*(N-k)$. Proof:
+
 $$
 \begin{aligned}
 \text{DFT}_N\bigl\{x^*(n)\bigr\} & = \sum_{n}^{N}{x^*(n)W_{N}^{nk}} \\
 &= \biggl[\sum_{n}^{N}{x(n)W_{N}^{-nk}}\biggr]^* \\
 &= \biggl[\sum_{n}^{N}{
-  x(n)  W_{N}^{-nk}\bcancel{ W_N^{nN} }_{\vphantom{\bigl)}\hphantom{.}=1}
+  x(n)  W_{N}^{-nk}\cancelto{=1}{ W_N^{nN}} \hphantom{....}
   }\biggr]^* \\
 &= X^*(N-k)
 \end{aligned}
 $$
+
 - For real-valued time series: $X(k)=X^*(N-k)$. Proof: since $x^*(n)=x(n)$, then
+
 $$
 \begin{aligned}
 \text{FFT}\bigl\{x(n)\bigr\} &= \text{FFT}\bigl\{x^*(n)\bigr\} \\
@@ -192,3 +200,11 @@ X(k) &= X^*(N-k)
 \end{aligned}
 $$
 
+## Real-valued FFT algorithms
+
+## Computational complexity
+
+A|B|C
+-|-|-
+d|a|a|
+z|z|z|
