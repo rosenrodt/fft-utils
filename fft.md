@@ -36,9 +36,9 @@ W^{n_1 k_1}_{N_1}}_{x''(k_1,k_2)}
 $$
 
 - Algorithm
-  1. Perform FFTs along the high dimension $\bold{D_2}$
+  1. Perform FFTs along the high dimension $\mathbf{D_2}$
   2. Pointwise multiply by twiddle factor $W^{n_1 k_2}_{N_1 N_2}$
-  3. Perform FFTs along the low dimension $\bold{D_1}$
+  3. Perform FFTs along the low dimension $\mathbf{D_1}$
   4. Read the resulting data transposed
 
 ***
@@ -90,10 +90,10 @@ $$
 ## Tree decomposition
 - Example input: 256-point signal
 - Decompose into 4-pass radix-4 FFTs
-   - Perform radix-4 FFTs along dim $\bold{D_4}$; pointwise-multiply twiddle factor $W_{N_3 N_4}$
-   - Perform radix-4 FFTs along dim $\bold{D_3}$; pointwise-multiply twiddle factor $W_{N_2 (N_4 N_3)^{(!)}}$
-   - Perform radix-4 FFTs along dim $\bold{D_2}$; pointwise-multiply twiddle factor $W_{N_1 (N_4 N_3 N_2)^{(!)}}$
-   - Perform radix-4 FFTs along dim $\bold{D_1}$
+   - Perform radix-4 FFTs along dim $\mathbf{D_4}$; pointwise-multiply twiddle factor $W_{N_3 N_4}$
+   - Perform radix-4 FFTs along dim $\mathbf{D_3}$; pointwise-multiply twiddle factor $W_{N_2 (N_4 N_3)^{(!)}}$
+   - Perform radix-4 FFTs along dim $\mathbf{D_2}$; pointwise-multiply twiddle factor $W_{N_1 (N_4 N_3 N_2)^{(!)}}$
+   - Perform radix-4 FFTs along dim $\mathbf{D_1}$
    - Read the data transposed
 ```txt
   256 (N1xN2xN3xN4) .____ 4  (N1)
@@ -107,9 +107,9 @@ $$
 - How to make tree traversal deepest child node first? -->
 
 - Alternative Method - Decompose into pseudo-2D 16x16 matrix
-   - Perform 2-pass radix-4 FFTs along $\bold{D_{N_3 N_4}}$ pseudo-dimension; pointwise-multiply twiddle factor $W_{N_3 N_4}$
+   - Perform 2-pass radix-4 FFTs along $\mathbf{D_{N_3 N_4}}$ pseudo-dimension; pointwise-multiply twiddle factor $W_{N_3 N_4}$
    - Pointwise-multiply twiddle factor $W_{(N_1 N_2)(N_4 N_3)^{(!)}}$
-   - Perform 2-pass radix-4 FFTs along $\bold{D_{N_1 N_2}}$ pseudo-dimension; pointwise-multiply twiddle factor $W_{N_1 N_2}$
+   - Perform 2-pass radix-4 FFTs along $\mathbf{D_{N_1 N_2}}$ pseudo-dimension; pointwise-multiply twiddle factor $W_{N_1 N_2}$
    - Read the data transposed
 ```txt
   256 (N1xN2xN3xN4) .____ 16 (N1xN2) .____ 4 (N1)
@@ -125,7 +125,7 @@ $$
 ## Progressive transposition (Stockham algorithm)
 
 - Instead of transposing all dimensions at once in the end, transpose one at a time as we do the butterfly
-- Improve performance since reads from LDS are always coalesced (see: Geometric View of Stockham Algorithm)
+- Access pattern is more sequential--good for the cache (see: Geometric View of Stockham Algorithm)
 <!-- - TODO: Example
   - Before: FFT pass 0 -> LDS exchange -> FFT pass 1 -> WB+T
   - Now:    FFT -> WB -> FFT -> WB+T -->
@@ -177,21 +177,27 @@ $$
   - DIT: coarser twiddle $W_{N_2 N_3}$ $\rightarrow$ finer twiddle $W_{N_1(N_3 N_2)}$
   - DIF: finer twiddle $W_{(N_1 N_2) N_3}$ $\rightarrow$ coarser twiddle $W_{N_1 N_2}$
 
+***
+
 ## Complex conjugation property
 - Complex conjugation property: $x^*(n)\xrightarrow{\text{DFT}_N}X^*(N-k)$. Proof:
 
 $$
 \begin{aligned}
-\text{DFT}_N\bigl\{x^*(n)\bigr\} & = \sum_{n}^{N}{x^*(n)W_{N}^{nk}} \\
-&= \biggl[\sum_{n}^{N}{x(n)W_{N}^{-nk}}\biggr]^* \\
-&= \biggl[\sum_{n}^{N}{
+\text{DFT}_N\bigl\{x^*(n)\bigr\} & = \sum_{n}^{N}{x^*(n)W_{N}^{nk}}
+= \biggl[\sum_{n}^{N}{x(n)W_{N}^{-nk}}\biggr]^*
+= \biggl[\sum_{n}^{N}{
   x(n)  W_{N}^{-nk}\cancelto{=1}{ W_N^{nN}} \hphantom{....}
   }\biggr]^* \\
-&= X^*(N-k)
+&= \biggl[\sum_{n}^{N}{
+  x(n)  W_{N}^{n(N-k)}
+  }\biggr]^*
+= X^*(N-k)
 \end{aligned}
 $$
 
-- For real-valued time series: $X(k)=X^*(N-k)$. Proof: since $x^*(n)=x(n)$, then
+- Conjugate symmetry For R2C FFT: $X(k)=X^*(N-k)$. Proof:
+
 
 $$
 \begin{aligned}
@@ -202,6 +208,60 @@ $$
 
 ## Real-valued FFT algorithms
 
+Forward R2C:
+- Construct a made-up complex valued sequence $z(n)$ from real-valued signal $x(n)$ $(1)$
+  - Even-indexed in real part
+  - Odd-indexed in imaginary part
+- Transform $z(n)$ into $Z(k)$. From which extract real/imag parts $X_e(k)$ and $X_o(k)$ $(2)$
+- Use DIT property to reconstruct $X(k)$ from $X_e(k)$ and $X_o(k)$ $(3)$
+
+$$
+\begin{aligned}
+x(n) &, \qquad n=0, ..., N-1 \\
+z(n) = x_e(n) + jx_o(n) &, \qquad n=0, ..., {N \over 2}-1 \\
+Z(k) = \mathcal{F}_{N/2}\bigl\{z(n)\bigr\}= X_e(k) + jX_o(k) &, \qquad k=0,...,{N \over 2}-1 \\
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\Rightarrow X(k) &= X_e(k) + W^k_N X_o(k) &\qquad \text{——from (1)} \\
+&= \frac{1}{2} \biggl[Z(k) + Z^*(\frac{N}{2}-k)\biggr] + W^k_N \frac{1}{2j} \biggl[Z(k) - Z^*(\frac{N}{2}-k)\biggr], &\qquad \text{——from (2)} \\
+&\ \text{for}\ k=0,..., {N \over 2} - 1 \\
+X(k) &= X_e(k) - X_o(k) \quad \text{for}\  k= {N \over 2} \\
+X(k) &= X^*(N-k) \quad \text{for}\ k={N \over 2}+1, ... N-1
+\end{aligned}
+$$
+
+Backward C2R
+- TODO
+
+***
+
+## Appendix
+### Decimation in time (DIT)
+$$
+\begin{aligned}
+X(k) &= \sum_{n=0}^{N-1} x(n) W_N^{nk} \\
+&= \sum_{n=0}^{{N/2}-1} x(2n)W_N^{2nk} + \hphantom{W^k_N} \sum_{n=0}^{{N/2}-1} x(2n+1)W_N^{2(n+1)k} \\
+&= \underbrace{\sum_{n=0}^{{N/2}-1} x(2n)W_{N/2}^{nk} }_{ X_e(k)} + W^k_N \underbrace{\sum_{n=0}^{{N/2}-1} x(2n+1)W_{N/2}^{nk} }_{X_o(k)}
+\tag{1}
+\end{aligned}
+$$
+
+### Extract real and imag part
+$$
+\begin{aligned}
+z(n) = x_r(n) + jx_i(n)
+\end{aligned}
+$$
+$$
+\begin{aligned}
+X_r(k) &= \mathcal{F}\biggl\{ \frac{1}{2} \left( z + z^* \right) \biggr\} = \frac{1}{2}  \biggl[Z(k) + Z^*(N-k)\biggr], \qquad &k=0,...,N-1 \\
+X_i(k) &= \mathcal{F}\biggl\{ \frac{1}{2j}\left( z - z^* \right) \biggr\} = \frac{1}{2j} \biggl[Z(k) - Z^*(N-k)\biggr], \qquad &k=0,...,N-1
+\tag{2}
+\end{aligned}
+$$
 ## Computational complexity
 
 A|B|C
