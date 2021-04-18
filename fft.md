@@ -206,35 +206,32 @@ X(k) &= X^*(N-k)
 \end{aligned}
 $$
 
+***
+
 ## Real-valued FFT algorithms
 
-Forward R2C:
-- Construct a made-up complex valued sequence $z(n)$ from real-valued signal $x(n)$ $(1)$
-  - Even-indexed in real part
-  - Odd-indexed in imaginary part
-- Transform $z(n)$ into $Z(k)$. From which extract real/imag parts $X_e(k)$ and $X_o(k)$ $(2)$
-- Use DIT property to reconstruct $X(k)$ from $X_e(k)$ and $X_o(k)$ $(3)$
+### Forward R2C
+1. Make up complex valued sequence $z(n)$ from real-valued sequence $x(n)$
+  $$ z(n) = x_e(n) + jx_o(n) , \qquad n=0, ..., {N \over 2}-1 $$
+2. Transform $z(n)$ into $Z(k)$. From which extract real/imag parts $X_e(k)$ and $X_o(k)$
+  $$\begin{aligned}
+  Z(k) &= X_e(k) + j\ X_o(k) \\
+       &= \underbrace{\frac{1}{2 } \biggl[Z(k) + Z^*\biggl(\frac{N}{2}-k\biggr)\biggr]}_{X_e(k)}
+          + j\ \underbrace{\frac{1}{2j} \biggl[Z(k) - Z^*\biggl(\frac{N}{2}-k\biggr)\biggr]}_{X_o(k)}
+  \end{aligned}$$
+3. Use DIT property and complex conjugate property to reconstruct $X(k) = X_e(k) +  W^k_N X_o(k)$
+  $$
+  \begin{aligned}
+  X(k) & = X_e(k) + W^k_N X_o(k) &\quad \text{for}\ k=0,..., {N \over 2} - 1 \\
+  X(k) & = X_e(k) + W^0_N X_o(k) = X_e(k) + X_o(k) &\quad \text{for}\ k= {N \over 2} \\
+  X(k) & = X^*(N-k) &\quad \text{for}\ k={N \over 2}+1, ... N-1
+  \end{aligned}
+  $$
 
-$$
-\begin{aligned}
-x(n) &, \qquad n=0, ..., N-1 \\
-z(n) = x_e(n) + jx_o(n) &, \qquad n=0, ..., {N \over 2}-1 \\
-Z(k) = \mathcal{F}_{N/2}\bigl\{z(n)\bigr\}= X_e(k) + jX_o(k) &, \qquad k=0,...,{N \over 2}-1 \\
-\end{aligned}
-$$
-
-$$
-\begin{aligned}
-\Rightarrow X(k) &= X_e(k) + W^k_N X_o(k) &\qquad \text{——from (1)} \\
-&= \frac{1}{2} \biggl[Z(k) + Z^*(\frac{N}{2}-k)\biggr] + W^k_N \frac{1}{2j} \biggl[Z(k) - Z^*(\frac{N}{2}-k)\biggr], &\qquad \text{——from (2)} \\
-&\ \text{for}\ k=0,..., {N \over 2} - 1 \\
-X(k) &= X_e(k) - X_o(k) \quad \text{for}\  k= {N \over 2} \\
-X(k) &= X^*(N-k) \quad \text{for}\ k={N \over 2}+1, ... N-1
-\end{aligned}
-$$
-
-Backward C2R
-- TODO
+### Backward C2R
+1. Obtain $X_e(k)/X_o(k)$ of the time domain sequence such that $z(n) = x_e(n) + jx_o(n)$
+2. Inverse transform $Z(k) = X_e(n) + jX_o(n)$
+3. $x_e = Re\{z\}, \ x_o = Im\{z\}$
 
 ***
 
