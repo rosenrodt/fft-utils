@@ -212,7 +212,7 @@ $$
 
 ### Forward R2C
 1. Make up complex valued sequence $z(n)$ from real-valued sequence $x(n)$
-  $$ z(n) = x_e(n) + jx_o(n) , \qquad n=0, ..., {N \over 2}-1 $$
+  $$ z(n) = \underbrace{x(2n)}_{x_e(n)} + j\ \underbrace{x(2n+1)}_{x_o(n)} , \qquad n=0, ..., {N \over 2}-1 $$
 2. Transform $z(n)$ into $Z(k)$. From which extract real/imag parts $X_e(k)$ and $X_o(k)$
   $$\begin{aligned}
   Z(k) &= X_e(k) + j\ X_o(k) \\
